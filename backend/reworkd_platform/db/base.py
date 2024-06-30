@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from reworkd_platform.db.meta import meta
-from reworkd_platform.web.api.http_responses import not_found
 
 T = TypeVar("T", bound="Base")
 
@@ -32,8 +31,7 @@ class Base(DeclarativeBase):
     async def get_or_404(cls: Type[T], session: AsyncSession, id_: str) -> T:
         if model := await cls.get(session, id_):
             return model
-
-        raise not_found(detail=f"{cls.__name__}[{id_}] not found")
+        raise ValueError(f"{cls.__name__}[{id_}] not found")
 
     async def save(self: T, session: AsyncSession) -> T:
         session.add(self)

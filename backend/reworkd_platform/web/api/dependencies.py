@@ -9,7 +9,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from reworkd_platform.db.crud.user import UserCrud
 from reworkd_platform.db.dependencies import get_db_session
 from reworkd_platform.schemas.user import UserBase
-from reworkd_platform.web.api.http_responses import forbidden
+
+from fastapi import HTTPException
 
 
 def user_crud(
@@ -28,10 +29,10 @@ async def get_current_user(
     try:
         session = await crud.get_user_session(session_token)
     except NoResultFound:
-        raise forbidden("Invalid session token")
+        raise HTTPException(status_code=401, detail="Invalid session token")
 
     if session.expires <= datetime.utcnow():
-        raise forbidden("Session token expired")
+        raise HTTPException(status_code=401, detail="Session token expired")
 
     return UserBase(
         id=session.user.id,
